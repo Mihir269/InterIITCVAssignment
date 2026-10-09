@@ -1,0 +1,7 @@
+{
+  "label": "noisy",
+  "ensemble_of": [
+    "t4_cvrelabel",
+    "t4_cvrelabel_s1"
+  ]
+}

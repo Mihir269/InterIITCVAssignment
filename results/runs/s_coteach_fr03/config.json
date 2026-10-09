@@ -1,0 +1,22 @@
+{
+  "data_dir": "/kaggle/input/cv-bootcamp-data2/data",
+  "out_dir": "/kaggle/working/runs",
+  "name": "s_coteach_fr03",
+  "label": "noisy",
+  "forget_rate": 0.3,
+  "num_gradual": 10,
+  "epochs": 60,
+  "batch_size": 128,
+  "lr": 0.1,
+  "momentum": 0.9,
+  "wd": 0.0005,
+  "seed": 0,
+  "no_amp": false,
+  "limit_batches": 0,
+  "train_idx_file": null,
+  "cv_folds": 0,
+  "targets_file": null,
+  "label_smoothing": 0.0,
+  "method": "coteaching",
+  "gpu": "Tesla T4"
+}

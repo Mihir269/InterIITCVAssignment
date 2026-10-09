@@ -1,0 +1,7 @@
+{
+  "label": "noisy",
+  "ensemble_of": [
+    "t4_gce",
+    "t4_gce_s1"
+  ]
+}

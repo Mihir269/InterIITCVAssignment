@@ -1,0 +1,5 @@
+method,real_val_noisy,real_val_clean,synth_val_synthetic,synth_val_clean
+ce_baseline,0.5592,0.7708,0.5022,0.833
+elr_mixup,0.5922,0.8946,0.5464,0.9248
+cv_relabel_mixup,0.5914,0.8624,0.5406,0.9114
+gce_mixup,0.5896,0.8506,0.5366,0.9044

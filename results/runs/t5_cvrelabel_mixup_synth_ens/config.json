@@ -1,0 +1,7 @@
+{
+  "label": "synthetic",
+  "ensemble_of": [
+    "t5_cvrelabel_mixup_synth",
+    "t5_cvrelabel_mixup_synth_s1"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "label": "noisy",
+  "ensemble_of": [
+    "s_elr_mix2",
+    "s_elr_mix2_s1"
+  ]
+}

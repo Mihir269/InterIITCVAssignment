@@ -1,0 +1,7 @@
+{
+  "label": "synthetic",
+  "ensemble_of": [
+    "t5_elr_mix1_synth",
+    "t5_elr_mix1_synth_s1"
+  ]
+}

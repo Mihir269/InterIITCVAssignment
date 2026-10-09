@@ -1,0 +1,8 @@
+{
+  "best_epoch": 57,
+  "val_acc_given_best": 0.5849999785423279,
+  "val_acc_given_final": 0.5837999582290649,
+  "val_acc_noisy_final": 0.5837999582290649,
+  "val_acc_clean_final": 0.8725999593734741,
+  "total_time_min": 18.86398602326711
+}

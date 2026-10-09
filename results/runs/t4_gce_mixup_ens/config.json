@@ -1,0 +1,7 @@
+{
+  "label": "noisy",
+  "ensemble_of": [
+    "t4_gce_mixup",
+    "t4_gce_mixup_s1"
+  ]
+}

@@ -1,0 +1,10 @@
+data/*
+!data/README.md
+outputs/
+submission/
+submissions/
+*.zip
+__pycache__/
+*.pyc
+code/kaggle/dataset*/
+code/kaggle/kernel_*/
