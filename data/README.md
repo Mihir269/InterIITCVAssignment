@@ -1,6 +1,7 @@
 # data/
 
-Put the files provided with the bootcamp here (they are not committed: CIFAR-10 images and CIFAR-10N labels):
+Put the files provided with the bootcamp here. They are not committed: the dataset is too large for GitHub
+(`train_images.npy` is 153 MB, above the 100 MB per-file limit; ~185 MB in total).
 
 ```
 data/

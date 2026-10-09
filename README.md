@@ -26,6 +26,7 @@ score only ~59–60% noisy val.
 ├── report.md                 answers to Q1–Q5 (≤ 100 words each)
 ├── results.json              settings and validation numbers (submission template, filled)
 ├── predictions/              the 10 submitted prediction files (t1_*, t2_*, t3_*, t4_*, t5_*)
+├── models/                   weights of the submitted networks (fp16, ~21 MB each)
 ├── code/                     all scripts – see code/README.md for every command
 │   ├── train.py              single-network trainer (CE/GCE/SCE, mixup, ELR, SOP, forward-T, relabel, CV folds)
 │   ├── coteach.py dividemix.py elrplus.py   two-network methods
@@ -37,10 +38,38 @@ score only ~59–60% noisy val.
 │   ├── tables/               ranked runs, Task 3 signals, real-vs-synthetic, confusion matrices
 │   └── figures/              noise matrices, memorization curves
 ├── docs/EXPERIMENTS.md       everything that was tried, with results and the reason for each decision
-├── data/README.md            where to put the provided bootcamp files (not committed)
+├── data/README.md            where to put the provided bootcamp files (dataset not committed – too large)
 ├── check_format.py           provided format checker
 └── requirements.txt
 ```
+
+## Data
+
+The dataset is **not included in this repository**: `train_images.npy` alone is 153 MB, above GitHub's 100 MB
+per-file limit (≈185 MB in total), and it is the bootcamp's provided data (CIFAR-10 images with CIFAR-10N
+labels). Place the provided files in `data/` as described in [`data/README.md`](data/README.md).
+
+## Model weights
+
+`models/` holds the weights of every network behind a submitted prediction file – 11 ResNet-18s, final epoch
+(60), stored in fp16 (~21 MB each; load with `code/predict.py`, which casts back to fp32).
+
+| prediction file | weights | reproduced by the weights |
+|---|---|---|
+| `t1_clean_ref.csv` | `t1_clean_ref.pt` | exactly (final epoch) |
+| `t1_noisy_ce.csv` | `t1_noisy_ce.pt` | exactly (final epoch) |
+| `t2_early_stop.csv` | – | from epoch 43 of the same run (per-epoch predictions were saved during training; only final weights were kept) |
+| `t4_elr_mixup.csv` | `t4_elr_mixup_seed0.pt` + `_seed1.pt` | file is the best noisy-val epoch (58); weights are epoch 60 (noisy val 59.14 vs 59.22) |
+| `t4_cv_relabel_mixup.csv` | `t4_cv_relabel_mixup_seed0.pt` + `_seed1.pt` | file is epoch 55; weights are epoch 60 |
+| `t4_gce_mixup.csv` | `t4_gce_mixup_seed0.pt` + `_seed1.pt` | file is epoch 54; weights are epoch 60 |
+| `t5_baseline_synth.csv` | `t5_baseline_synth.pt` | exactly (final epoch) |
+| `t5_best_synth.csv` | `t5_elr_mixup_synth_seed0.pt` + `_seed1.pt` | exactly (best epoch = 60) |
+
+```bash
+python code/predict.py --weights models/t5_elr_mixup_synth_seed0.pt models/t5_elr_mixup_synth_seed1.pt --out t5_best_synth.csv
+```
+Checked against the predictions saved during training: 99.93–99.99% identical (a few borderline test images
+change because of fp16 rounding).
 
 ## Approach
 
@@ -98,7 +127,7 @@ humans versus 37% of the rest, while random noise is flat (44% vs 40%).
 ## Reproducing
 ```bash
 pip install -r requirements.txt
-# put the provided files in data/ (see data/README.md), then follow code/README.md, e.g.
+# put the provided files in data/ (see data/README.md; the dataset is not in the repo), then follow code/README.md, e.g.
 python code/train.py --label noisy --name t1_noisy
 python code/make_submission.py --roll_no 24b2443 --name "Mihir Gune" --t5_best_run t5_elr_mix1_synth_ens
 ```

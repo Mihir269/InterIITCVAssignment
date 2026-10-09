@@ -32,6 +32,7 @@ snapshot (`python code/collect_results.py --dest results`).
 | `estimate_T.py`, `noise_corrected_val.py` | transition matrix estimated without clean labels; noise-corrected validation |
 | `noise_difficulty.py` | are mislabeled images harder? (human vs synthetic, Q5) |
 | `compare_runs.py`, `collect_results.py` | rank runs; build the `results/` snapshot |
+| `predict.py` | test predictions from the released weights in `models/` (1 or 2 networks) |
 | `make_submission.py` | fills `results.json`, copies prediction files, runs `check_format.py`, builds the zip |
 | `kaggle/kgl.py`, `kaggle/make_notebook.py` | run the same commands on Kaggle GPUs (2× T4) via the Kaggle CLI |
 
