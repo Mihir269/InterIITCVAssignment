@@ -31,6 +31,7 @@ snapshot (`python code/collect_results.py --dest results`).
 | `feature_scores.py`, `handcrafted_scores.py`, `pair_scores.py` | Task 3 experiments: kNN / centroid scores on network features, hand-crafted (LBP, GLCM, HOG, colour) features, look-alike pairs |
 | `estimate_T.py`, `noise_corrected_val.py` | transition matrix estimated without clean labels; noise-corrected validation |
 | `noise_difficulty.py` | are mislabeled images harder? (human vs synthetic, Q5) |
+| `data_analysis.py` | final data analysis: figures + numbers for docs/ANALYSIS.md |
 | `compare_runs.py`, `collect_results.py` | rank runs; build the `results/` snapshot |
 | `predict.py` | test predictions from the released weights in `models/` (1 or 2 networks) |
 | `make_submission.py` | fills `results.json`, copies prediction files, runs `check_format.py`, builds the zip |

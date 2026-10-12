@@ -1,0 +1,586 @@
+{
+  "A_class_counts": {
+    "clean": {
+      "airplane": 4505,
+      "automobile": 4496,
+      "bird": 4504,
+      "cat": 4469,
+      "deer": 4513,
+      "dog": 4533,
+      "frog": 4503,
+      "horse": 4506,
+      "ship": 4496,
+      "truck": 4475
+    },
+    "human": {
+      "airplane": 4791,
+      "automobile": 5414,
+      "bird": 4788,
+      "cat": 4205,
+      "deer": 3636,
+      "dog": 5130,
+      "frog": 3770,
+      "horse": 4748,
+      "ship": 4160,
+      "truck": 4358
+    },
+    "synthetic": {
+      "airplane": 4497,
+      "automobile": 4480,
+      "bird": 4602,
+      "cat": 4347,
+      "deer": 4516,
+      "dog": 4528,
+      "frog": 4559,
+      "horse": 4420,
+      "ship": 4499,
+      "truck": 4552
+    }
+  },
+  "A_noise_rate_by_true_class": {
+    "cat": {
+      "human": 0.5149,
+      "synthetic": 0.4095
+    },
+    "deer": {
+      "human": 0.5136,
+      "synthetic": 0.398
+    },
+    "truck": {
+      "human": 0.4445,
+      "synthetic": 0.4
+    },
+    "dog": {
+      "human": 0.422,
+      "synthetic": 0.4002
+    },
+    "automobile": {
+      "human": 0.409,
+      "synthetic": 0.4017
+    },
+    "frog": {
+      "human": 0.4057,
+      "synthetic": 0.3966
+    },
+    "bird": {
+      "human": 0.369,
+      "synthetic": 0.3894
+    },
+    "airplane": {
+      "human": 0.3507,
+      "synthetic": 0.3982
+    },
+    "ship": {
+      "human": 0.3158,
+      "synthetic": 0.4026
+    },
+    "horse": {
+      "human": 0.2796,
+      "synthetic": 0.4137
+    }
+  },
+  "A_pair_asymmetry": [
+    {
+      "pair": "automobile<->truck",
+      "i_to_j": 1126,
+      "j_to_i": 1247
+    },
+    {
+      "pair": "cat<->dog",
+      "i_to_j": 924,
+      "j_to_i": 834
+    },
+    {
+      "pair": "deer<->horse",
+      "i_to_j": 683,
+      "j_to_i": 233
+    },
+    {
+      "pair": "airplane<->ship",
+      "i_to_j": 379,
+      "j_to_i": 369
+    },
+    {
+      "pair": "deer<->dog",
+      "i_to_j": 491,
+      "j_to_i": 183
+    },
+    {
+      "pair": "bird<->frog",
+      "i_to_j": 222,
+      "j_to_i": 373
+    }
+  ],
+  "A_label_purity": {
+    "airplane": {
+      "human": 0.6105,
+      "synthetic": 0.6028
+    },
+    "automobile": {
+      "human": 0.4908,
+      "synthetic": 0.6004
+    },
+    "bird": {
+      "human": 0.5936,
+      "synthetic": 0.5976
+    },
+    "cat": {
+      "human": 0.5156,
+      "synthetic": 0.6071
+    },
+    "deer": {
+      "human": 0.6037,
+      "synthetic": 0.6016
+    },
+    "dog": {
+      "human": 0.5107,
+      "synthetic": 0.6005
+    },
+    "frog": {
+      "human": 0.7098,
+      "synthetic": 0.596
+    },
+    "horse": {
+      "human": 0.6837,
+      "synthetic": 0.5977
+    },
+    "ship": {
+      "human": 0.7394,
+      "synthetic": 0.597
+    },
+    "truck": {
+      "human": 0.5704,
+      "synthetic": 0.5899
+    }
+  },
+  "B_mislabel_rate_by_difficulty_decile": {
+    "human": [
+      0.592,
+      0.456,
+      0.482,
+      0.374,
+      0.372,
+      0.344,
+      0.334,
+      0.3613,
+      0.3527,
+      0.322
+    ],
+    "synthetic": [
+      0.432,
+      0.452,
+      0.37,
+      0.418,
+      0.43,
+      0.376,
+      0.404,
+      0.4092,
+      0.3808,
+      0.448
+    ]
+  },
+  "B_image_statistics": {
+    "brightness": {
+      "human_wrong": 0.4615,
+      "human_correct": 0.4816,
+      "synth_wrong": 0.4734,
+      "synth_correct": 0.4736,
+      "auroc_human": 0.5461,
+      "auroc_synth": 0.5005
+    },
+    "contrast": {
+      "human_wrong": 0.1939,
+      "human_correct": 0.1953,
+      "synth_wrong": 0.1945,
+      "synth_correct": 0.1948,
+      "auroc_human": 0.5077,
+      "auroc_synth": 0.5014
+    },
+    "colourfulness": {
+      "human_wrong": 0.1303,
+      "human_correct": 0.1334,
+      "synth_wrong": 0.132,
+      "synth_correct": 0.1323,
+      "auroc_human": 0.5124,
+      "auroc_synth": 0.5032
+    }
+  },
+  "B_mislabel_rate_by_contrast_decile": {
+    "human": [
+      0.4069,
+      0.4156,
+      0.4029,
+      0.4184,
+      0.4013,
+      0.3944,
+      0.4011,
+      0.3969,
+      0.3918,
+      0.3949
+    ],
+    "synthetic": [
+      0.4127,
+      0.39,
+      0.4036,
+      0.4007,
+      0.3991,
+      0.4036,
+      0.396,
+      0.4011,
+      0.4,
+      0.4031
+    ]
+  },
+  "C_memorization_final": {
+    "human": 0.6379,
+    "synthetic": 0.3871
+  },
+  "C_epoch_mislabeled_fit_exceeds_30pct_human": 48,
+  "C_epoch_mislabeled_fit_exceeds_30pct_synthetic": 56,
+  "C_memorized_share_by_true_class_epoch60": {
+    "airplane": 0.6823,
+    "automobile": 0.4051,
+    "bird": 0.6576,
+    "cat": 0.7718,
+    "deer": 0.7265,
+    "dog": 0.725,
+    "frog": 0.5895,
+    "horse": 0.519,
+    "ship": 0.5514,
+    "truck": 0.641
+  },
+  "D_spearman_noisy_vs_clean": 0.8546,
+  "D_top_runs_noisy_val_range": [
+    0.5804,
+    0.5922
+  ],
+  "D_top_runs_clean_val_range": [
+    0.8286,
+    0.8946
+  ],
+  "D_n_runs": 49,
+  "E_auroc_overall": 0.9664,
+  "E_auroc_by_given_label": {
+    "airplane": 0.9861,
+    "automobile": 0.9876,
+    "bird": 0.9554,
+    "cat": 0.9255,
+    "deer": 0.9753,
+    "dog": 0.9329,
+    "frog": 0.9762,
+    "horse": 0.9674,
+    "ship": 0.9872,
+    "truck": 0.9855
+  },
+  "E_precision_recall_at_budget": [
+    {
+      "review_share": 0.05,
+      "precision": 0.9991,
+      "recall": 0.1241
+    },
+    {
+      "review_share": 0.1,
+      "precision": 0.9982,
+      "recall": 0.2481
+    },
+    {
+      "review_share": 0.2,
+      "precision": 0.9862,
+      "recall": 0.4901
+    },
+    {
+      "review_share": 0.3,
+      "precision": 0.9578,
+      "recall": 0.714
+    },
+    {
+      "review_share": 0.4,
+      "precision": 0.8841,
+      "recall": 0.8787
+    },
+    {
+      "review_share": 0.5,
+      "precision": 0.7697,
+      "recall": 0.9564
+    }
+  ],
+  "F_per_class_clean_val_acc": {
+    "airplane": {
+      "ce_early_stop": 0.8202,
+      "elr_mixup": 0.9434
+    },
+    "automobile": {
+      "ce_early_stop": 0.9583,
+      "elr_mixup": 0.9702
+    },
+    "bird": {
+      "ce_early_stop": 0.8448,
+      "elr_mixup": 0.8931
+    },
+    "cat": {
+      "ce_early_stop": 0.6968,
+      "elr_mixup": 0.6441
+    },
+    "deer": {
+      "ce_early_stop": 0.6016,
+      "elr_mixup": 0.809
+    },
+    "dog": {
+      "ce_early_stop": 0.7537,
+      "elr_mixup": 0.9422
+    },
+    "frog": {
+      "ce_early_stop": 0.7525,
+      "elr_mixup": 0.9416
+    },
+    "horse": {
+      "ce_early_stop": 0.8219,
+      "elr_mixup": 0.9352
+    },
+    "ship": {
+      "ce_early_stop": 0.9127,
+      "elr_mixup": 0.9623
+    },
+    "truck": {
+      "ce_early_stop": 0.5543,
+      "elr_mixup": 0.92
+    }
+  },
+  "F_top_remaining_confusions_val": [
+    {
+      "true": "cat",
+      "predicted": "dog",
+      "count": 132
+    },
+    {
+      "true": "deer",
+      "predicted": "horse",
+      "count": 43
+    },
+    {
+      "true": "truck",
+      "predicted": "automobile",
+      "count": 33
+    },
+    {
+      "true": "deer",
+      "predicted": "dog",
+      "count": 33
+    },
+    {
+      "true": "horse",
+      "predicted": "dog",
+      "count": 23
+    },
+    {
+      "true": "cat",
+      "predicted": "frog",
+      "count": 20
+    }
+  ],
+  "F_mislabeled_train_images_corrected_by_class": {
+    "airplane": 0.8089,
+    "automobile": 0.9614,
+    "bird": 0.7864,
+    "cat": 0.4363,
+    "deer": 0.6708,
+    "dog": 0.8683,
+    "frog": 0.8938,
+    "horse": 0.854,
+    "ship": 0.9183,
+    "truck": 0.8245
+  },
+  "F_mislabeled_train_images_corrected_overall": 0.7856,
+  "F_correct_train_images_kept": 0.9624,
+  "F_ce_epoch60_mislabeled_true_class": 0.2467,
+  "F_test_predicted_class_counts": {
+    "t1_clean_ref": {
+      "airplane": 1013,
+      "automobile": 1005,
+      "bird": 992,
+      "cat": 949,
+      "deer": 1024,
+      "dog": 1037,
+      "frog": 1011,
+      "horse": 976,
+      "ship": 1004,
+      "truck": 989
+    },
+    "t1_noisy_ce": {
+      "airplane": 1006,
+      "automobile": 1235,
+      "bird": 1101,
+      "cat": 808,
+      "deer": 787,
+      "dog": 1230,
+      "frog": 859,
+      "horse": 1059,
+      "ship": 962,
+      "truck": 953
+    },
+    "t2_early_stop": {
+      "airplane": 979,
+      "automobile": 1354,
+      "bird": 1360,
+      "cat": 1072,
+      "deer": 651,
+      "dog": 1163,
+      "frog": 859,
+      "horse": 970,
+      "ship": 1008,
+      "truck": 584
+    },
+    "t4_elr_mixup": {
+      "airplane": 1033,
+      "automobile": 1057,
+      "bird": 1016,
+      "cat": 668,
+      "deer": 834,
+      "dog": 1359,
+      "frog": 1010,
+      "horse": 1051,
+      "ship": 1016,
+      "truck": 956
+    },
+    "t4_cv_relabel_mixup": {
+      "airplane": 1074,
+      "automobile": 1188,
+      "bird": 1051,
+      "cat": 645,
+      "deer": 809,
+      "dog": 1369,
+      "frog": 977,
+      "horse": 1083,
+      "ship": 984,
+      "truck": 820
+    },
+    "t4_gce_mixup": {
+      "airplane": 1041,
+      "automobile": 1221,
+      "bird": 1066,
+      "cat": 827,
+      "deer": 741,
+      "dog": 1216,
+      "frog": 948,
+      "horse": 1118,
+      "ship": 991,
+      "truck": 831
+    },
+    "t5_baseline_synth": {
+      "airplane": 991,
+      "automobile": 1123,
+      "bird": 1045,
+      "cat": 846,
+      "deer": 944,
+      "dog": 980,
+      "frog": 1002,
+      "horse": 910,
+      "ship": 1057,
+      "truck": 1102
+    },
+    "t5_best_synth": {
+      "airplane": 1076,
+      "automobile": 1010,
+      "bird": 954,
+      "cat": 935,
+      "deer": 1003,
+      "dog": 1013,
+      "frog": 1013,
+      "horse": 1003,
+      "ship": 990,
+      "truck": 1003
+    }
+  },
+  "F_test_agreement_with_clean_reference": {
+    "t1_clean_ref": 1.0,
+    "t1_noisy_ce": 0.6992,
+    "t2_early_stop": 0.7742,
+    "t4_elr_mixup": 0.8962,
+    "t4_cv_relabel_mixup": 0.869,
+    "t4_gce_mixup": 0.8529,
+    "t5_baseline_synth": 0.7303,
+    "t5_best_synth": 0.9274
+  },
+  "F_test_agreement_matrix": {
+    "t1_clean_ref": {
+      "t1_clean_ref": 1.0,
+      "t1_noisy_ce": 0.6992,
+      "t2_early_stop": 0.7742,
+      "t4_elr_mixup": 0.8962,
+      "t4_cv_relabel_mixup": 0.869,
+      "t4_gce_mixup": 0.8529,
+      "t5_baseline_synth": 0.7303,
+      "t5_best_synth": 0.9274
+    },
+    "t1_noisy_ce": {
+      "t1_clean_ref": 0.6992,
+      "t1_noisy_ce": 1.0,
+      "t2_early_stop": 0.7006,
+      "t4_elr_mixup": 0.7145,
+      "t4_cv_relabel_mixup": 0.713,
+      "t4_gce_mixup": 0.7144,
+      "t5_baseline_synth": 0.5779,
+      "t5_best_synth": 0.6959
+    },
+    "t2_early_stop": {
+      "t1_clean_ref": 0.7742,
+      "t1_noisy_ce": 0.7006,
+      "t2_early_stop": 1.0,
+      "t4_elr_mixup": 0.7976,
+      "t4_cv_relabel_mixup": 0.8038,
+      "t4_gce_mixup": 0.8048,
+      "t5_baseline_synth": 0.6383,
+      "t5_best_synth": 0.7798
+    },
+    "t4_elr_mixup": {
+      "t1_clean_ref": 0.8962,
+      "t1_noisy_ce": 0.7145,
+      "t2_early_stop": 0.7976,
+      "t4_elr_mixup": 1.0,
+      "t4_cv_relabel_mixup": 0.919,
+      "t4_gce_mixup": 0.9002,
+      "t5_baseline_synth": 0.7092,
+      "t5_best_synth": 0.9123
+    },
+    "t4_cv_relabel_mixup": {
+      "t1_clean_ref": 0.869,
+      "t1_noisy_ce": 0.713,
+      "t2_early_stop": 0.8038,
+      "t4_elr_mixup": 0.919,
+      "t4_cv_relabel_mixup": 1.0,
+      "t4_gce_mixup": 0.8969,
+      "t5_baseline_synth": 0.6956,
+      "t5_best_synth": 0.8826
+    },
+    "t4_gce_mixup": {
+      "t1_clean_ref": 0.8529,
+      "t1_noisy_ce": 0.7144,
+      "t2_early_stop": 0.8048,
+      "t4_elr_mixup": 0.9002,
+      "t4_cv_relabel_mixup": 0.8969,
+      "t4_gce_mixup": 1.0,
+      "t5_baseline_synth": 0.6885,
+      "t5_best_synth": 0.8693
+    },
+    "t5_baseline_synth": {
+      "t1_clean_ref": 0.7303,
+      "t1_noisy_ce": 0.5779,
+      "t2_early_stop": 0.6383,
+      "t4_elr_mixup": 0.7092,
+      "t4_cv_relabel_mixup": 0.6956,
+      "t4_gce_mixup": 0.6885,
+      "t5_baseline_synth": 1.0,
+      "t5_best_synth": 0.7318
+    },
+    "t5_best_synth": {
+      "t1_clean_ref": 0.9274,
+      "t1_noisy_ce": 0.6959,
+      "t2_early_stop": 0.7798,
+      "t4_elr_mixup": 0.9123,
+      "t4_cv_relabel_mixup": 0.8826,
+      "t4_gce_mixup": 0.8693,
+      "t5_baseline_synth": 0.7318,
+      "t5_best_synth": 1.0
+    }
+  }
+}

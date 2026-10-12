@@ -36,8 +36,10 @@ score only ~59–60% noisy val.
 ├── results/
 │   ├── runs/<run>/           config + per-epoch log of every training run (81 runs)
 │   ├── tables/               ranked runs, Task 3 signals, real-vs-synthetic, confusion matrices
+│   ├── analysis/             figures + analysis.json of the final data analysis
 │   └── figures/              noise matrices, memorization curves
 ├── docs/EXPERIMENTS.md       everything that was tried, with results and the reason for each decision
+├── docs/ANALYSIS.md         final data analysis: labels, images, dynamics, selection, detector, final model
 ├── data/README.md            where to put the provided bootcamp files (dataset not committed – too large)
 ├── check_format.py           provided format checker
 └── requirements.txt
@@ -115,6 +117,8 @@ points). Humans mislabel the *hard* images: 52% of the hardest fifth of validati
 humans versus 37% of the rest, while random noise is flat (44% vs 40%).
 
 ## Key findings
+Full analysis with 11 figures: [`docs/ANALYSIS.md`](docs/ANALYSIS.md).
+
 1. Human noise is structured twice over: **which classes** (look-alike pairs) and **which images** (ambiguous
    ones). The second is why it is harder to learn, detect and correct than random noise.
 2. Noisy validation accuracy saturates near 59% and cannot recognise models that *correct* annotator errors
