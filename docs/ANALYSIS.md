@@ -106,6 +106,10 @@ alarms.
 
 ## F. The final model (ELR + mixup)
 
+*This section analyses plain ELR + mixup (2 nets). The cat→dog bias found here led to the final round of
+experiments: post-hoc class rebalancing (the submitted best method, cat 64% → 68%) and distribution alignment
+(cat 63% → 79% for a single network, 90.6% clean for 2 nets) – see `docs/EXPERIMENTS.md`, Round 5.*
+
 ![F1](../results/analysis/F1_per_class_accuracy.png)
 
 Clean validation accuracy per class, early-stopped CE → ELR + mixup: truck 55 → 92, frog 75 → 94, dog 75 → 94,

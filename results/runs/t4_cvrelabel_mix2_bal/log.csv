@@ -1,0 +1,2 @@
+epoch,val_acc_given,val_acc_noisy,val_acc_synthetic,val_acc_clean
+55,0.5926,0.5926,0.5236,0.8774

@@ -140,6 +140,25 @@ JOBS = {
         ("t4_elrplus", "--label noisy", "elrplus.py"),
         ("t5_elrplus_synth", "--label synthetic", "elrplus.py"),
     ],
+    # cat->dog bias fixes on top of ELR + mixup (single net screens, seed 0)
+    "balA": [
+        ("b_elr_da", "--label noisy --elr_lambda 3 --mixup 1.0 --dist_align"),
+        ("b_elr_rs05", "--label noisy --elr_lambda 3 --mixup 1.0 --resample_power 0.5"),
+        ("b_elr_rs10", "--label noisy --elr_lambda 3 --mixup 1.0 --resample_power 1.0"),
+    ],
+    "balB": [
+        ("b_elr_cw10", "--label noisy --elr_lambda 3 --mixup 1.0 --class_weight_power 1.0"),
+        ("b_elr_da_rs10", "--label noisy --elr_lambda 3 --mixup 1.0 --dist_align --resample_power 1.0"),
+        ("b_elr_da_cw10", "--label noisy --elr_lambda 3 --mixup 1.0 --dist_align --class_weight_power 1.0"),
+    ],
+    # winner (ELR + mixup + distribution alignment): second net, and both nets on synthetic labels (Task 5)
+    "balC": [
+        ("b_elr_da_s1", "--label noisy --elr_lambda 3 --mixup 1.0 --dist_align --seed 1"),
+        ("t5_elr_da_synth", "--label synthetic --elr_lambda 3 --mixup 1.0 --dist_align"),
+    ],
+    "balD": [
+        ("t5_elr_da_synth_s1", "--label synthetic --elr_lambda 3 --mixup 1.0 --dist_align --seed 1"),
+    ],
 }
 
 

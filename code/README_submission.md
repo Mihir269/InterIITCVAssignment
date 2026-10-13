@@ -50,76 +50,60 @@ hand-crafted features; adding hand-crafted scores to AUM never helped. The submi
 needs no extra trained model (Task 3 is limited to 5 training runs; the best kNN features come from a Task 4 model).
 
 ## Task 4 – robust training (same recipe and budget as the noisy CE baseline)
-Every method uses at most 2 networks x 60 epochs; the test file is the epoch with the best NOISY
-validation accuracy (for 2-net methods: of the averaged softmax). Submitted = the three method families
-with the highest noisy validation accuracy, each at its best configuration (no clean labels in any choice).
+Every method uses at most 2 networks x 60 epochs; the test file is the epoch with the best NOISY validation
+accuracy (for 2-net methods: of the averaged softmax). The post-hoc class rebalancing strength is chosen the same
+way. Submitted = the three methods with the highest noisy validation accuracy (no clean labels in any choice).
 ```bash
-python code/task4_targets.py          # from the Task 3 CV models: relabel targets (beta 0.2) + estimated noise rate (0.466)
+python code/task4_targets.py     # relabel targets (beta 0.2) and estimated noise rate from the Task 3 folds
 
-# elr_mixup (best, 59.22%): early-learning regularization (lambda 3, target momentum 0.7) + mixup alpha 1, 2 nets
+# submitted 1/3 – elr_mixup_rebalanced (best): ELR lambda 3, target momentum 0.7, mixup alpha 1, 2 nets, + rebalancing
 python code/train.py --label noisy --name s_elr_mix1    --elr_lambda 3 --mixup 1.0
 python code/train.py --label noisy --name s_elr_mix1_s1 --elr_lambda 3 --mixup 1.0 --seed 1
 python code/ensemble.py --runs s_elr_mix1 s_elr_mix1_s1 --name t4_elr_mix1_ens
+python code/rebalance.py --ens t4_elr_mix1_ens --members s_elr_mix1 s_elr_mix1_s1 --name t4_elr_mix1_bal
 
-# cv_relabel_mixup (59.14%): targets = 0.2 * noisy one-hot + 0.8 * held-out CV prediction, mixup alpha 2, 2 nets
+# submitted 2/3 – cv_relabel_mixup_rebalanced: targets 0.2*noisy one-hot + 0.8*held-out CV prediction, mixup alpha 2
 python code/train.py --label noisy --name s_relabel_b02_mix2    --mixup 2.0 --targets_file outputs/aux/targets_cvrelabel.npy
 python code/train.py --label noisy --name s_relabel_b02_mix2_s1 --mixup 2.0 --targets_file outputs/aux/targets_cvrelabel.npy --seed 1
 python code/ensemble.py --runs s_relabel_b02_mix2 s_relabel_b02_mix2_s1 --name t4_cvrelabel_mix2_ens
+python code/rebalance.py --ens t4_cvrelabel_mix2_ens --members s_relabel_b02_mix2 s_relabel_b02_mix2_s1 --name t4_cvrelabel_mix2_bal
 
-# gce_mixup (58.96%): generalized cross-entropy (q 0.7) + mixup alpha 1, 2 nets averaged
-python code/train.py --label noisy --name t4_gce_mixup    --loss gce --mixup 1.0
-python code/train.py --label noisy --name t4_gce_mixup_s1 --loss gce --mixup 1.0 --seed 1
-python code/ensemble.py --runs t4_gce_mixup t4_gce_mixup_s1 --name t4_gce_mixup_ens
+# submitted 3/3 – elr_mixup_distalign: ELR + mixup with distribution-aligned ELR targets
+python code/train.py --label noisy --name b_elr_da    --elr_lambda 3 --mixup 1.0 --dist_align
+python code/train.py --label noisy --name b_elr_da_s1 --elr_lambda 3 --mixup 1.0 --dist_align --seed 1
+python code/ensemble.py --runs b_elr_da b_elr_da_s1 --name t4_elr_da_ens
 ```
 
-### Everything else that was tried (all selected out by noisy validation accuracy)
-Noisy val of the best epoch (single net unless noted). These were selection experiments; the scripts for the
-methods that are not `train.py` options (two-network ELR, DivideMix, co-teaching) are in the GitHub repository.
+Noisy val of the submitted methods: elr_mixup_rebalanced 59.30 (best), cv_relabel_mixup_rebalanced 59.26,
+elr_mixup_distalign 59.24. Other configurations tried (noisy val, 2 nets unless noted): ELR + mixup 59.22,
+relabel + mixup 59.14, GCE + mixup 58.96, SOP 58.92, two-network ELR 58.84, co-teaching 58.52, DivideMix 58.26,
+forward correction + mixup 57.84, ELR + rebalanced sampling 59.16 (1 net), ELR + class weights 58.92 (1 net),
+plus ~30 loss / mixup / relabelling variants. Full table, per-epoch logs and scripts for every experiment:
+https://github.com/Mihir269/InterIITCVAssignment (docs/EXPERIMENTS.md).
 
-| run | config | noisy val |
-|---|---|---|
-| t4_elrplus | two-network ELR (cross targets from weight-averaged nets, mixup 1) | 58.84 |
-| t4_sop_ens | SOP: per-sample sparse noise terms (`--sop`), 2 nets | 58.92 |
-| t4_elr_mix2_ens / s_elr | ELR + mixup 2 (2 nets) / ELR without mixup | 58.84 / 58.50 |
-| s_coteach_fr04 | co-teaching, forget rate 0.4 (2 nets) | 58.52 |
-| t4_cvrelabel_b05_ens | relabel beta 0.5 + mixup 1, 2 nets | 59.12 |
-| t4_cvrelabel_mixup_ens | relabel beta 0.2 + mixup 1, 2 nets | 58.72 |
-| t4_gce_ens | GCE q 0.7, 2 nets | 58.50 |
-| s_relabel_b02_mix1_gce | relabel targets + GCE + mixup 1 | 58.32 |
-| t4_dividemix | DivideMix-style (2 nets, 10 warm-up epochs) | 58.26 |
-| s_relabel_b0_mix1 | relabel beta 0 + mixup 1 | 58.18 |
-| s_coteach_fr03 / t4_coteach | co-teaching, forget 0.3 / 0.466 (CV estimate) | 58.08 / 57.78 |
-| t4_cvrelabel_ens | relabel beta 0.2, no mixup, 2 nets | 58.04 |
-| s_gce_q07_mix2 / s_gce_q07_mix05 | GCE + mixup 2 / 0.5 | 57.98 / 57.98 |
-| s_gce_q05_mix1 / s_gce_q09_mix1 | GCE q 0.5 / 0.9 + mixup 1 | 57.80 / 56.82 |
-| s_ls03_mix1 | label smoothing 0.3 + mixup 1 | 57.78 |
-| s_ce_mix1 | CE + mixup 1 | 57.44 |
-| s_sce_mix1 | SCE + mixup 1 | 55.72 |
-| s_fwd_mix2 / s_fwd_mix1 / s_fwd_ce | forward loss correction (`--forward_T`) with T estimated from noisy labels only, mixup 2 / 1 / none | 57.84 / 57.54 / 56.10 |
-| o_adamw_* | AdamW (lr 1e-3 / 3e-3, wd 0.05) instead of SGD: noisy CE 55.92 / 55.86, relabel+mixup 2 59.00, clean ref 93.8% (SGD 94.5%); memorizes wrong labels earlier (87% vs 64% at epoch 60), so SGD was kept | — |
-
-Noise-corrected validation (inverting the estimated transition matrix on the noisy validation confusion) was tested as a clean-label-free selector; it ranked runs no better than plain noisy validation, because human errors concentrate on the same hard images the models get wrong.
-
-Note: the clean-label validation accuracy logged for these runs is a measurement only. DivideMix, for
-example, measured 89.3% clean val (about as high as the submitted ELR + mixup) but was not submitted, because its noisy
-validation accuracy was lower and clean labels may not be used to select models.
+Note: the clean-label validation accuracy logged for these runs is a measurement only. DivideMix, for example,
+measured 89.3% clean val but was not submitted, because its noisy validation accuracy was lower and clean labels
+may not be used to select models.
 
 ## Task 5 – synthetic noise (same commands with --label synthetic)
 ```bash
-python code/train.py --label synthetic --name t5_baseline_synth          # CE baseline -> pred_final.csv
-# best Task 4 method (elr_mixup) on synthetic labels -> t5_best_synth.csv
+python code/train.py --label synthetic --name t5_baseline_synth                       # -> t5_baseline_synth.csv (final epoch)
+# best Task 4 method on synthetic labels -> t5_best_synth.csv
 python code/train.py --label synthetic --name t5_elr_mix1_synth    --elr_lambda 3 --mixup 1.0
 python code/train.py --label synthetic --name t5_elr_mix1_synth_s1 --elr_lambda 3 --mixup 1.0 --seed 1
 python code/ensemble.py --runs t5_elr_mix1_synth t5_elr_mix1_synth_s1 --name t5_elr_mix1_synth_ens
-# the other submitted methods on synthetic labels, for the Q5 ranking
+python code/rebalance.py --ens t5_elr_mix1_synth_ens --members t5_elr_mix1_synth t5_elr_mix1_synth_s1 --name t5_elr_mix1_synth_bal
+# the other submitted methods on synthetic labels (Q5 ranking)
 for k in 0 1 2 3 4; do python code/train.py --label synthetic --name t5_cv$k --cv_folds 5 --cv_fold $k --no_train_logits; done
 python code/task4_targets.py --label synthetic --prefix t5_cv --suffix _synth
 python code/train.py --label synthetic --name t5_cvrelabel_mix2_synth    --mixup 2.0 --targets_file outputs/aux/targets_cvrelabel_synth.npy
 python code/train.py --label synthetic --name t5_cvrelabel_mix2_synth_s1 --mixup 2.0 --targets_file outputs/aux/targets_cvrelabel_synth.npy --seed 1
 python code/ensemble.py --runs t5_cvrelabel_mix2_synth t5_cvrelabel_mix2_synth_s1 --name t5_cvrelabel_mix2_synth_ens
-python code/train.py --label synthetic --name t5_gce_mixup_synth    --loss gce --mixup 1.0
-python code/train.py --label synthetic --name t5_gce_mixup_synth_s1 --loss gce --mixup 1.0 --seed 1
-python code/ensemble.py --runs t5_gce_mixup_synth t5_gce_mixup_synth_s1 --name t5_gce_mixup_synth_ens
+python code/rebalance.py --ens t5_cvrelabel_mix2_synth_ens --members t5_cvrelabel_mix2_synth t5_cvrelabel_mix2_synth_s1 --name t5_cvrelabel_mix2_synth_bal
+python code/train.py --label synthetic --name t5_elr_da_synth    --elr_lambda 3 --mixup 1.0 --dist_align
+python code/train.py --label synthetic --name t5_elr_da_synth_s1 --elr_lambda 3 --mixup 1.0 --dist_align --seed 1
+python code/ensemble.py --runs t5_elr_da_synth t5_elr_da_synth_s1 --name t5_elr_da_synth_ens
+python code/noise_difficulty.py
 ```
 
 ## Human vs random (synthetic) noise – analysis behind Q1 and Q5
@@ -146,5 +130,5 @@ python code/noise_difficulty.py   # are mislabeled images harder? (measurement o
 
 ## Assemble and check
 ```bash
-python code/make_submission.py --roll_no <rollno> --name "<name>" --t5_best_run t5_elr_mix1_synth_ens
+python code/make_submission.py --roll_no <rollno> --name "<name>" --t5_best_run t5_elr_mix1_synth_bal
 ```

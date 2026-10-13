@@ -123,33 +123,63 @@ noisy validation label is wrong. It was **not** submitted: choosing it would mea
 | SOP (per-sample noise terms), 1 net → 2 nets | 58.66 → 58.92 | 83.7 → 85.7 |
 | two-network ELR (cross targets from weight-averaged nets, mixup 1) | 58.84 | 88.9 |
 
-### Final selection
-The three method families with the highest noisy val, each at its best configuration:
+### Round 5 – the cat→dog bias
+Annotators over-use "dog" and under-use "cat"; ELR + mixup inherits it (test predictions: 1,359 dogs, 668 cats;
+clean val cat 64% vs dog 94%). Fixes that use no labels:
 
-| family | submitted configuration | noisy val | clean val (measured) |
+| ELR + mixup + … (single net, seed 0) | noisy val | clean val | cat / dog acc (measured) |
 |---|---|---|---|
-| regularization | **ELR + mixup, 2 nets (`best_method`)** | **59.22** | **89.5** |
-| label correction | CV relabel + mixup 2, 2 nets | 59.14 | 86.2 |
-| robust loss | GCE + mixup 1, 2 nets | 58.96 | 85.1 |
-| *(not submitted)* per-sample noise | SOP, 2 nets | 58.92 | 85.7 |
-| *(not submitted)* sample selection | co-teaching forget 0.4 | 58.52 | 85.6 |
-| *(not submitted)* semi-supervised | DivideMix | 58.26 | 89.3 |
+| nothing (reference) | 58.86 | 88.7 | 62.7 / 93.4 |
+| **distribution alignment** (ELR targets rescaled by uniform / running-mean prediction) | **59.32** | **90.3** | **78.7** / 86.1 |
+| rebalanced sampling, power 0.5 / 1.0 (rare labels drawn more often, fresh crop/flip each time) | 59.16 / 59.14 | 89.8 / 89.7 | 68.9 / 76.8 |
+| class-weighted loss (inverse label frequency) | 58.92 | 89.3 | 70.8 / 89.1 |
+| distribution alignment + sampling 1.0 / + class weights | 58.96 / 58.84 | 90.1 / 90.4 | 77.0 / 81.0 |
 
-ELR + mixup is both the noisy-val winner and the most accurate eligible model, so the official rule and the
-measured quality agree.
+Distribution alignment, 2 nets: 59.24 noisy val, 90.56 clean (seed 1 alone: 58.84 / 90.20).
+
+**Post-hoc class rebalancing** (`code/rebalance.py`, no retraining): class shares of the networks' own predictions
+on the training images (ELR + mixup: cat 6.9%, dog 13.4%), outputs shifted by −τ·log(share / 0.1); τ chosen from
+{0, 0.25, …, 1.5} by noisy validation:
+
+| method (2 nets) | τ chosen | noisy val | clean val |
+|---|---|---|---|
+| ELR + mixup | 0.75 | 59.22 → **59.30** | 89.46 → 89.90 (cat 64% → 68%) |
+| CV relabel + mixup | 0.5 | 59.14 → 59.26 | 86.26 → 87.74 |
+| GCE + mixup | 0 | 58.96 (unchanged) | 85.06 |
+| ELR + mixup + distribution alignment | 0 | 59.24 (unchanged) | 90.56 |
+
+### Final selection
+The three methods with the highest noisy validation accuracy (2 networks each; post-hoc rebalancing is part of
+each method, with τ chosen on noisy val):
+
+| method | noisy val | clean val (measured) |
+|---|---|---|
+| **ELR + mixup + class rebalancing (`best_method`)** | **59.30** | 89.9 |
+| CV relabel + mixup + class rebalancing | 59.26 | 87.7 |
+| ELR + mixup + distribution alignment | 59.24 | **90.6** |
+| *(not submitted)* ELR + mixup | 59.22 | 89.5 |
+| *(not submitted)* GCE + mixup | 58.96 | 85.1 |
+| *(not submitted)* SOP | 58.92 | 85.7 |
+| *(not submitted)* co-teaching forget 0.4 | 58.52 | 85.6 |
+| *(not submitted)* DivideMix | 58.26 | 89.3 |
+
+The top four are within 4 images of each other on noisy validation (±0.7-point noise), so the ranking among them
+is essentially a tie; the rule-based choice still submits the most accurate model (distribution alignment) as the
+third method.
 
 ## 5. Real vs synthetic noise (Task 5)
 
 | method | real: noisy val | real: clean | synthetic: synth val | synthetic: clean |
 |---|---|---|---|---|
 | CE (early stop; Task 5 file is the final epoch: 45.4 / 74.0) | 55.92 | 77.1 | 50.22 | 83.3 |
-| ELR + mixup | 59.22 | 89.5 | 54.64 | 92.5 |
-| relabel + mixup | 59.14 | 86.2 | 54.06 | 91.1 |
-| GCE + mixup | 58.96 | 85.1 | 53.66 | 90.4 |
+| ELR + mixup + rebalancing (τ 0.5 on synthetic) | 59.30 | 89.9 | 54.66 | 92.5 |
+| CV relabel + mixup + rebalancing (τ 1.25 on synthetic) | 59.26 | 87.7 | 54.28 | 91.5 |
+| ELR + mixup + distribution alignment | 59.24 | 90.6 | 54.56 | 92.6 |
 
-Same ranking on both. Synthetic noise is easier for every method; the methods gain more on human noise
-(+12.4 vs +9.2 clean points over CE). Ablation: mixup helped GCE on human noise (+0.46) but not on synthetic
-noise (−0.36). Two-network ELR on synthetic labels: 54.08 / 91.6.
+ELR + rebalancing leads on both; the other two swap places within noise. Synthetic noise is easier for every
+method; the methods gain more on human noise (+12.8 vs +9.2 clean points over CE). On synthetic labels the
+networks' predictions are already balanced (cat 9.3%, dog 9.9% of training images), so rebalancing changes almost
+nothing. Earlier ablation: mixup helped GCE on human noise (+0.46) but not on synthetic noise (−0.36).
 
 **Why human noise is harder** (`code/noise_difficulty.py`; difficulty = confidence of the clean-label reference
 model in the true class on validation images it never trained on):
@@ -169,4 +199,4 @@ undone with a per-class transition matrix.
 * First Kaggle dataset upload (loose files) failed to mount on Kaggle (`ERRORED_MOUNTING_DATASET`); re-uploading
   the data as a single zip fixed it.
 * Kaggle allows 2 concurrent GPU sessions; `code/kaggle/` queues jobs, one per GPU.
-* About 25 GPU-hours on Kaggle in total.
+* About 30 GPU-hours on Kaggle in total.

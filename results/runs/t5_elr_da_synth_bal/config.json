@@ -1,0 +1,22 @@
+{
+  "label": "synthetic",
+  "rebalanced_from": "t5_elr_da_synth_ens",
+  "members": [
+    "t5_elr_da_synth",
+    "t5_elr_da_synth_s1"
+  ],
+  "epoch": 58,
+  "tau": 0.0,
+  "predicted_share_train": [
+    0.1054,
+    0.1011,
+    0.0967,
+    0.0982,
+    0.0978,
+    0.0975,
+    0.1002,
+    0.1015,
+    0.1006,
+    0.1009
+  ]
+}

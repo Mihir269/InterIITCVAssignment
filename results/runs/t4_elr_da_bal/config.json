@@ -1,0 +1,22 @@
+{
+  "label": "noisy",
+  "rebalanced_from": "t4_elr_da_ens",
+  "members": [
+    "b_elr_da",
+    "b_elr_da_s1"
+  ],
+  "epoch": 60,
+  "tau": 0.0,
+  "predicted_share_train": [
+    0.1008,
+    0.1061,
+    0.1018,
+    0.0889,
+    0.0902,
+    0.1086,
+    0.1004,
+    0.1042,
+    0.1015,
+    0.0973
+  ]
+}

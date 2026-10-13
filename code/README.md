@@ -21,7 +21,7 @@ snapshot (`python code/collect_results.py --dest results`).
 | script | purpose |
 |---|---|
 | `model.py` | the provided ResNet-18 (unchanged copy) |
-| `train.py` | single-network trainer: `--label clean/noisy/synthetic`; `--loss ce/gce/sce`; `--mixup`; `--label_smoothing`; `--elr_lambda` (ELR); `--sop` (SOP); `--forward_T` (forward correction); `--targets_file` (relabel targets); `--cv_folds/--cv_fold` (Task 3 folds); `--optimizer adamw` (comparison only) |
+| `train.py` | single-network trainer: `--label clean/noisy/synthetic`; `--loss ce/gce/sce`; `--mixup`; `--label_smoothing`; `--elr_lambda` (ELR); `--sop` (SOP); `--forward_T` (forward correction); `--targets_file` (relabel targets); `--cv_folds/--cv_fold` (Task 3 folds); `--class_weight_power`, `--resample_power`, `--dist_align` (class balancing); `--optimizer adamw` (comparison only) |
 | `ensemble.py` | average two runs of a method (the 2-network budget) epoch by epoch; best epoch by `val_acc_given` |
 | `coteach.py`, `dividemix.py`, `elrplus.py` | two-network methods (co-teaching, DivideMix-style, two-network ELR) |
 | `analyze_noise.py` | Task 1: noise rate, 10x10 noisy-vs-clean matrices, figure |
@@ -34,6 +34,7 @@ snapshot (`python code/collect_results.py --dest results`).
 | `data_analysis.py` | final data analysis: figures + numbers for docs/ANALYSIS.md |
 | `compare_runs.py`, `collect_results.py` | rank runs; build the `results/` snapshot |
 | `predict.py` | test predictions from the released weights in `models/` (1 or 2 networks) |
+| `rebalance.py` | post-hoc class rebalancing of a 2-network method (strength chosen on validation against the training labels) |
 | `make_submission.py` | fills `results.json`, copies prediction files, runs `check_format.py`, builds the zip |
 | `kaggle/kgl.py`, `kaggle/make_notebook.py` | run the same commands on Kaggle GPUs (2× T4) via the Kaggle CLI |
 
@@ -63,23 +64,27 @@ python code/pair_scores.py
 ```bash
 python code/task4_targets.py     # relabel targets (beta 0.2) and estimated noise rate from the Task 3 folds
 
-# submitted 1/3 – elr_mixup (best): ELR lambda 3, target momentum 0.7, mixup alpha 1, 2 nets averaged
+# submitted 1/3 – elr_mixup_rebalanced (best): ELR lambda 3, target momentum 0.7, mixup alpha 1, 2 nets, + rebalancing
 python code/train.py --label noisy --name s_elr_mix1    --elr_lambda 3 --mixup 1.0
 python code/train.py --label noisy --name s_elr_mix1_s1 --elr_lambda 3 --mixup 1.0 --seed 1
 python code/ensemble.py --runs s_elr_mix1 s_elr_mix1_s1 --name t4_elr_mix1_ens
+python code/rebalance.py --ens t4_elr_mix1_ens --members s_elr_mix1 s_elr_mix1_s1 --name t4_elr_mix1_bal
 
-# submitted 2/3 – cv_relabel_mixup: targets 0.2*noisy one-hot + 0.8*held-out CV prediction, mixup alpha 2
+# submitted 2/3 – cv_relabel_mixup_rebalanced: targets 0.2*noisy one-hot + 0.8*held-out CV prediction, mixup alpha 2
 python code/train.py --label noisy --name s_relabel_b02_mix2    --mixup 2.0 --targets_file outputs/aux/targets_cvrelabel.npy
 python code/train.py --label noisy --name s_relabel_b02_mix2_s1 --mixup 2.0 --targets_file outputs/aux/targets_cvrelabel.npy --seed 1
 python code/ensemble.py --runs s_relabel_b02_mix2 s_relabel_b02_mix2_s1 --name t4_cvrelabel_mix2_ens
+python code/rebalance.py --ens t4_cvrelabel_mix2_ens --members s_relabel_b02_mix2 s_relabel_b02_mix2_s1 --name t4_cvrelabel_mix2_bal
 
-# submitted 3/3 – gce_mixup: GCE q 0.7, mixup alpha 1
-python code/train.py --label noisy --name t4_gce_mixup    --loss gce --mixup 1.0
-python code/train.py --label noisy --name t4_gce_mixup_s1 --loss gce --mixup 1.0 --seed 1
-python code/ensemble.py --runs t4_gce_mixup t4_gce_mixup_s1 --name t4_gce_mixup_ens
+# submitted 3/3 – elr_mixup_distalign: ELR + mixup with distribution-aligned ELR targets
+python code/train.py --label noisy --name b_elr_da    --elr_lambda 3 --mixup 1.0 --dist_align
+python code/train.py --label noisy --name b_elr_da_s1 --elr_lambda 3 --mixup 1.0 --dist_align --seed 1
+python code/ensemble.py --runs b_elr_da b_elr_da_s1 --name t4_elr_da_ens
 
 # examples of the other experiments (full list with results in docs/EXPERIMENTS.md)
-python code/train.py --label noisy --name t4_gce --loss gce
+python code/train.py --label noisy --name t4_gce_mixup --loss gce --mixup 1.0
+python code/train.py --label noisy --name b_elr_rs10 --elr_lambda 3 --mixup 1.0 --resample_power 1.0
+python code/train.py --label noisy --name b_elr_cw10 --elr_lambda 3 --mixup 1.0 --class_weight_power 1.0
 python code/train.py --label noisy --name s_sop --sop
 python code/coteach.py --label noisy --name s_coteach_fr04 --forget_rate 0.4
 python code/dividemix.py --label noisy --name t4_dividemix
@@ -92,24 +97,27 @@ python code/compare_runs.py                 # rank every run by noisy validation
 ## Task 5 – synthetic noise
 ```bash
 python code/train.py --label synthetic --name t5_baseline_synth                       # -> t5_baseline_synth.csv (final epoch)
+# best Task 4 method on synthetic labels -> t5_best_synth.csv
 python code/train.py --label synthetic --name t5_elr_mix1_synth    --elr_lambda 3 --mixup 1.0
 python code/train.py --label synthetic --name t5_elr_mix1_synth_s1 --elr_lambda 3 --mixup 1.0 --seed 1
-python code/ensemble.py --runs t5_elr_mix1_synth t5_elr_mix1_synth_s1 --name t5_elr_mix1_synth_ens   # -> t5_best_synth.csv
+python code/ensemble.py --runs t5_elr_mix1_synth t5_elr_mix1_synth_s1 --name t5_elr_mix1_synth_ens
+python code/rebalance.py --ens t5_elr_mix1_synth_ens --members t5_elr_mix1_synth t5_elr_mix1_synth_s1 --name t5_elr_mix1_synth_bal
 # the other submitted methods on synthetic labels (Q5 ranking)
 for k in 0 1 2 3 4; do python code/train.py --label synthetic --name t5_cv$k --cv_folds 5 --cv_fold $k --no_train_logits; done
 python code/task4_targets.py --label synthetic --prefix t5_cv --suffix _synth
 python code/train.py --label synthetic --name t5_cvrelabel_mix2_synth    --mixup 2.0 --targets_file outputs/aux/targets_cvrelabel_synth.npy
 python code/train.py --label synthetic --name t5_cvrelabel_mix2_synth_s1 --mixup 2.0 --targets_file outputs/aux/targets_cvrelabel_synth.npy --seed 1
 python code/ensemble.py --runs t5_cvrelabel_mix2_synth t5_cvrelabel_mix2_synth_s1 --name t5_cvrelabel_mix2_synth_ens
-python code/train.py --label synthetic --name t5_gce_mixup_synth    --loss gce --mixup 1.0
-python code/train.py --label synthetic --name t5_gce_mixup_synth_s1 --loss gce --mixup 1.0 --seed 1
-python code/ensemble.py --runs t5_gce_mixup_synth t5_gce_mixup_synth_s1 --name t5_gce_mixup_synth_ens
+python code/rebalance.py --ens t5_cvrelabel_mix2_synth_ens --members t5_cvrelabel_mix2_synth t5_cvrelabel_mix2_synth_s1 --name t5_cvrelabel_mix2_synth_bal
+python code/train.py --label synthetic --name t5_elr_da_synth    --elr_lambda 3 --mixup 1.0 --dist_align
+python code/train.py --label synthetic --name t5_elr_da_synth_s1 --elr_lambda 3 --mixup 1.0 --dist_align --seed 1
+python code/ensemble.py --runs t5_elr_da_synth t5_elr_da_synth_s1 --name t5_elr_da_synth_ens
 python code/noise_difficulty.py
 ```
 
 ## Assemble the submission
 ```bash
-python code/make_submission.py --roll_no 24b2443 --name "Mihir Gune" --t5_best_run t5_elr_mix1_synth_ens
+python code/make_submission.py --roll_no 24b2443 --name "Mihir Gune" --t5_best_run t5_elr_mix1_synth_bal
 ```
 
 ## Running on Kaggle GPUs from a local machine

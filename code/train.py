@@ -92,6 +92,15 @@ def get_args():
                     help="SOP: per-sample sparse noise terms u_i^2*y - v_i^2*(1-y) absorb label errors")
     ap.add_argument("--sop_lr_u", type=float, default=10.0)
     ap.add_argument("--sop_lr_v", type=float, default=10.0)
+    # --- class-balance options (computed from the TRAINING label column only, never clean labels)
+    ap.add_argument("--class_weight_power", type=float, default=0.0,
+                    help="weight class c in the loss by (count_c / mean count)^-p, counts of the training labels; 0 = off")
+    ap.add_argument("--resample_power", type=float, default=0.0,
+                    help="draw each epoch's images with probability ~ count(label)^-p (rarer labels repeated, each "
+                         "time with a new random crop/flip); 0 = the usual shuffle")
+    ap.add_argument("--dist_align", action="store_true",
+                    help="ELR only: rescale the predictions that update the ELR targets by uniform / running-mean "
+                         "prediction, so the targets cannot drift toward over-used classes")
     args = ap.parse_args()
     if args.sop and (args.mixup or args.loss != "ce" or args.targets_file or args.forward_T):
         ap.error("--sop is used on its own (plain one-hot labels, CE)")
@@ -109,6 +118,9 @@ def loss_fn(logits, targets, args):
     T = getattr(args, "T_mat", None)
     if T is not None:  # forward correction: the net predicts clean classes, T maps them to annotator labels
         logp = (logp.exp() @ T).clamp_min(1e-7).log()
+    cw = getattr(args, "class_w", None)
+    if cw is not None:  # class-weighted (soft-target) loss
+        targets = targets * cw
     if args.loss == "ce":
         return -(targets * logp).sum(1).mean()
     p = logp.exp()
@@ -141,10 +153,13 @@ def load_data(args, device):
         return torch.from_numpy(a).permute(0, 3, 1, 2).contiguous().to(device)
 
     # normalization stats from all 45k training images (no labels involved), same for every run
-    tr = imgs[full_train_idx].astype(np.float32) / 255
-    mean = torch.tensor(tr.mean((0, 1, 2)), device=device).view(1, 3, 1, 1)
-    std = torch.tensor(tr.std((0, 1, 2)), device=device).view(1, 3, 1, 1)
-    del tr
+    s1, s2, n_px = np.zeros(3), np.zeros(3), 0  # chunked, so the stats never need all images in float at once
+    for i in range(0, len(full_train_idx), 5000):
+        c = imgs[full_train_idx[i:i + 5000]].astype(np.float64) / 255
+        s1 += c.sum((0, 1, 2)); s2 += (c ** 2).sum((0, 1, 2)); n_px += c.shape[0] * c.shape[1] * c.shape[2]
+    m = s1 / n_px
+    mean = torch.tensor(m, dtype=torch.float32, device=device).view(1, 3, 1, 1)
+    std = torch.tensor(np.sqrt(s2 / n_px - m ** 2), dtype=torch.float32, device=device).view(1, 3, 1, 1)
 
     def col(name, idx):
         return torch.from_numpy(labels.loc[idx, name].values).to(device)
@@ -252,8 +267,17 @@ def main():
     train_logits = None if args.no_train_logits else np.zeros((E, n_train, 10), np.float16)
     holdout_logits = np.zeros((E, len(D["holdout_idx"]), 10), np.float16) if args.cv_folds else None
     log = []
+    counts = torch.bincount(D["y_train"], minlength=10).float()
+    if args.class_weight_power:
+        args.class_w = (counts / counts.mean()) ** (-args.class_weight_power)
+        print("class weights:", [round(float(w), 3) for w in args.class_w])
+    sample_p = None
+    if args.resample_power:
+        sample_p = (counts ** (-args.resample_power))[D["y_train"]]
+        sample_p = sample_p / sample_p.sum()
     if args.elr_lambda:  # running average of the network's own predictions, one row per training image
         elr_t = torch.zeros(n_train, 10, device=device)
+        pbar = torch.full((10,), 0.1, device=device)  # running mean prediction (distribution alignment)
     if args.sop:  # per-sample noise parameters, tiny initialisation, own plain-SGD optimizer (no decay)
         sop_u = torch.nn.Parameter(torch.randn(n_train, 10, device=device) * 1e-8)
         sop_v = torch.nn.Parameter(torch.randn(n_train, 10, device=device) * 1e-8)
@@ -263,7 +287,10 @@ def main():
     for ep in range(1, E + 1):
         t0 = time.time()
         net.train()
-        perm = torch.randperm(n_train, device=device, generator=gen)
+        if sample_p is not None:  # rarer labels drawn more often (fresh augmentation each time)
+            perm = torch.multinomial(sample_p, n_train, replacement=True, generator=gen)
+        else:
+            perm = torch.randperm(n_train, device=device, generator=gen)
         tot_loss, seen = 0.0, 0
         for s in range(steps_per_epoch):
             bi = perm[s * args.batch_size:(s + 1) * args.batch_size]
@@ -298,6 +325,9 @@ def main():
                     else:
                         pc = p.detach()
                     pc = pc.clamp(1e-4, 1 - 1e-4)
+                    if args.dist_align:
+                        pbar.mul_(0.99).add_(pc.mean(0), alpha=0.01)
+                        pc = pc * (0.1 / pbar)
                     elr_t[bi] = args.elr_beta * elr_t[bi] + (1 - args.elr_beta) * pc / pc.sum(1, keepdim=True)
                     t_b = elr_t[bi]
                     if args.mixup:

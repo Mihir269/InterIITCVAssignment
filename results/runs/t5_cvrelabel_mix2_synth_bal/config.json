@@ -1,0 +1,22 @@
+{
+  "label": "synthetic",
+  "rebalanced_from": "t5_cvrelabel_mix2_synth_ens",
+  "members": [
+    "t5_cvrelabel_mix2_synth",
+    "t5_cvrelabel_mix2_synth_s1"
+  ],
+  "epoch": 55,
+  "tau": 1.25,
+  "predicted_share_train": [
+    0.1024,
+    0.1019,
+    0.1082,
+    0.1019,
+    0.0972,
+    0.1029,
+    0.091,
+    0.0933,
+    0.1051,
+    0.0961
+  ]
+}

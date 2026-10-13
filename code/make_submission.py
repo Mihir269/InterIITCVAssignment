@@ -21,14 +21,17 @@ CV = os.path.abspath(os.path.join(HERE, ".."))
 RUNS = os.path.join(CV, "outputs", "runs")
 SUBMIT_CODE = ["model.py", "train.py", "ensemble.py", "analyze_noise.py", "task2_analyze.py",
                "task3_scores.py", "task4_targets.py", "feature_scores.py", "handcrafted_scores.py",
-               "noise_difficulty.py", "make_submission.py"]
+               "noise_difficulty.py", "rebalance.py", "make_submission.py"]
 
 # Default Task 4 methods: (results.json name, run dir, prediction file name in predictions/).
 # Override with --t4 name:run_dir (file = t4_<name>.csv).
 T4 = [
-    ("elr_mixup", "t4_elr_mix1_ens", "t4_elr_mixup.csv"),                    # ELR (lambda 3, beta .7) + mixup 1, 2 nets avg
-    ("cv_relabel_mixup", "t4_cvrelabel_mix2_ens", "t4_cv_relabel_mixup.csv"),  # beta .2 targets, mixup 2, 2 nets avg
-    ("gce_mixup", "t4_gce_mixup_ens", "t4_gce_mixup.csv"),                    # GCE q .7, mixup 1, 2 nets averaged
+    # ELR (lambda 3, beta .7) + mixup 1, 2 nets averaged, + post-hoc class rebalancing (tau 0.75, chosen on noisy val)
+    ("elr_mixup_rebalanced", "t4_elr_mix1_bal", "t4_elr_mixup_rebalanced.csv"),
+    # relabel targets (beta .2) + mixup 2, 2 nets, + post-hoc class rebalancing (tau 0.5, chosen on noisy val)
+    ("cv_relabel_mixup_rebalanced", "t4_cvrelabel_mix2_bal", "t4_cv_relabel_mixup_rebalanced.csv"),
+    # ELR + mixup 1 + distribution alignment of the ELR targets, 2 nets (rebalancing tau chosen = 0)
+    ("elr_mixup_distalign", "t4_elr_da_ens", "t4_elr_mixup_distalign.csv"),
 ]
 T3_METHODS = {
     "insample_aum": "Area under the margin (AUM) from the Task 1 noisy CE run: for each training image, the margin "
